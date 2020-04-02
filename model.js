@@ -134,6 +134,11 @@ async function getPost(post_id){
 async function getCommentThread(post_id){
 	try{
 		let firstLevelComments = await pool.query("SELECT * FROM comments WHERE post_id = ? AND parent_comment_id IS NULL", [post_id]);
+		
+		for (let f = 0; f < firstLevelComments.length; f++){
+			firstLevelComments[f].comments = await pool.query("SELECT * FROM comments WHERE post_id = ? AND parent_comment_id = ?", [post_id, firstLevelComments[f].id]);
+		}
+		
 		return firstLevelComments;
 	}
 	catch(err){
