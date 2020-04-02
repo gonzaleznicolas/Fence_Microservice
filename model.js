@@ -120,6 +120,16 @@ async function getAllPosts(){
 	}
 }
 
+async function search(search_string){
+	try{
+		let posts = await pool.query("SELECT * FROM posts WHERE title LIKE CONCAT(\'%\',?,\'%\') OR content LIKE CONCAT(\'%\',?,\'%\') ORDER BY time DESC", [search_string, search_string]);
+		return posts;
+	}
+	catch(err){
+		console.log(err);
+	}
+}
+
 async function getMostRecentPosts(num_posts){
 	try{
 		let posts = await pool.query("SELECT * FROM posts ORDER BY time DESC LIMIT ?", [num_posts]);
@@ -165,6 +175,7 @@ module.exports = {
 	getMostRecentPosts,
 	getPost,
 	getCommentThread,
-	getAllPosts
+	getAllPosts,
+	search
 }
 

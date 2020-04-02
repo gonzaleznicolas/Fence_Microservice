@@ -12,6 +12,16 @@ router.get('/post/get/most_recent/:num_posts', async function (req, res) {
 	}
 });
 
+router.get('/post/search/:search_string', async function (req, res) {
+	try{
+		let search_string = req.params.search_string;
+		let posts = await model.search(search_string);
+		res.json(posts);
+	}catch (err){
+		console.log(err);
+	}
+});
+
 router.get('/post/get/all', async function (req, res) {
 	try{
 		let posts = await model.getAllPosts();
