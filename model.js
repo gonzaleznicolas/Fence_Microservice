@@ -136,7 +136,13 @@ async function getCommentThread(post_id){
 		let firstLevelComments = await pool.query("SELECT * FROM comments WHERE post_id = ? AND parent_comment_id IS NULL", [post_id]);
 		
 		for (let f = 0; f < firstLevelComments.length; f++){
-			firstLevelComments[f].comments = await pool.query("SELECT * FROM comments WHERE post_id = ? AND parent_comment_id = ?", [post_id, firstLevelComments[f].id]);
+			let secondLevelComments = await pool.query("SELECT * FROM comments WHERE post_id = ? AND parent_comment_id = ?", [post_id, firstLevelComments[f].id]);
+			firstLevelComments[f].comments = secondLevelComments;
+			
+			for (let s = 0; s < secondLevelComments.length; s++){
+				let thirdLevelComments = await pool.query("SELECT * FROM comments WHERE post_id = ? AND parent_comment_id = ?", [post_id, secondLevelComments[s].id]);
+				secondLevelComments[s].comments = thirdLevelComments;
+			}
 		}
 		
 		return firstLevelComments;
