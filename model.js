@@ -110,6 +110,15 @@ async function updatePosts(){
   }
 }
 
+async function getAllPosts(){
+	try{
+		let posts = await pool.query("SELECT * FROM posts ORDER BY time DESC");
+		return posts;
+	}
+	catch(err){
+		console.log(err);
+	}
+}
 
 async function getMostRecentPosts(num_posts){
 	try{
@@ -155,6 +164,7 @@ async function getCommentThread(post_id){
 module.exports = {
 	getMostRecentPosts,
 	getPost,
-	getCommentThread
+	getCommentThread,
+	getAllPosts
 }
 
