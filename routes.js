@@ -40,4 +40,20 @@ router.get('/post/get/:post_id', async function (req, res) {
 
 });
 
+router.get('/comments/get/:post_id', async function (req, res) {
+
+	try{
+		// get parameters from the url from the req.params object
+		let post_id = parseInt(req.params.post_id);
+
+		let commentThread = await model.getCommentThread(post_id);
+		
+		res.json(commentThread);
+	}
+	catch (err){
+		console.log(err);
+	}
+
+});
+
 module.exports = router;

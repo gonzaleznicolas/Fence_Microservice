@@ -31,14 +31,14 @@ async function initTables(){
         PRIMARY KEY(id), \
         UNIQUE id_UNIQUE (id))"),
       pool.query("CREATE TABLE IF NOT EXISTS posts ( \
-        id INT(11) NOT NULL AUTO_INCREMENT, \
+        id INT(11) NOT NULL, \
         title VARCHAR(50), \
         content VARCHAR(250) NOT NULL, \
         author_id INT(11) NOT NULL, \
         time DATETIME NOT NULL, \
         PRIMARY KEY(id))"),
       pool.query("CREATE TABLE IF NOT EXISTS comments ( \
-        id INT(11) NOT NULL AUTO_INCREMENT, \
+        id INT(11) NOT NULL, \
         content VARCHAR(3000) DEFAULT NULL, \
         author_id INT(11) DEFAULT NULL, \
         time DATETIME DEFAULT NULL, \
@@ -46,12 +46,23 @@ async function initTables(){
         parent_comment_id INT(11) DEFAULT NULL, \
         PRIMARY KEY(id))")
     ]);
-
+		
+		let lastPostInserted = await pool.query("SELECT id FROM posts ORDER BY id DESC LIMIT 1")
+		let lastCommentInserted = await pool.query("SELECT id FROM comments ORDER BY id DESC LIMIT 1")
+		let lastPostInsertedId = lastPostInserted.length == 0 ? -1 : lastPostInserted[0].id;
+		let lastCommentInsertedId = lastCommentInserted.length == 0 ? -1 : lastCommentInserted[0].id;
+		
+		lastIdUpdated = Math.max(lastPostInsertedId, lastCommentInsertedId)
+		
+		console.log("lastPostInsertedId:", lastPostInsertedId, "lastCommentInsertedId:", lastCommentInsertedId, "lastIdUpdated:", lastIdUpdated);
+		
+		/*
     console.log("Clearing posts table so it can be repopulated from events...")
     await pool.query("DELETE FROM posts WHERE id>0")
 
     console.log("Clearing comments table so it can be repopulated from events...")
     await pool.query("DELETE FROM comments WHERE id>0");
+		*/
   }
   catch (err) {
     console.log(err);
@@ -68,7 +79,8 @@ async function updatePosts(){
       if(newEvents[i].event_name == "new_post")
       {
         console.log("Inserting post:", newEvents[i]);
-        pool.query("INSERT INTO posts () VALUES (null,?,?,?,?)", [
+        pool.query("INSERT INTO posts () VALUES (?,?,?,?,?)", [
+					newEvents[i].id,
           newEvents[i].title,
           newEvents[i].content,
           newEvents[i].author_id,
@@ -78,7 +90,8 @@ async function updatePosts(){
       else if(newEvents[i].event_name == "comment_on_post" || newEvents[i].event_name == "comment_on_comment")
       {
         console.log("Inserting comment:", newEvents[i]);
-        pool.query("INSERT INTO comments () VALUES (null,?,?,?,?,?)", [
+        pool.query("INSERT INTO comments () VALUES (?,?,?,?,?,?)", [
+					newEvents[i].id,
           newEvents[i].content,
           newEvents[i].author_id,
           newEvents[i].time,
@@ -118,8 +131,19 @@ async function getPost(post_id){
 	}
 }
 
+async function getCommentThread(post_id){
+	try{
+		let firstLevelComments = await pool.query("SELECT * FROM comments WHERE post_id = ? AND parent_comment_id IS NULL", [post_id]);
+		return firstLevelComments;
+	}
+	catch(err){
+		console.log(err);
+	}
+}
+
 module.exports = {
 	getMostRecentPosts,
-	getPost
+	getPost,
+	getCommentThread
 }
 
