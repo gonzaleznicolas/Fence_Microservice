@@ -110,8 +110,8 @@ async function getMostRecentPosts(num_posts){
 
 async function getPost(post_id){
 	try{
-		let post = await pool.query("SELECT * FROM posts WHERE id = ?", [post_id]);
-		return post;
+		let posts = await pool.query("SELECT * FROM posts WHERE id = ?", [post_id]);
+		return posts[0];
 	}
 	catch(err){
 		console.log(err);
