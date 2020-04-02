@@ -97,7 +97,18 @@ async function updatePosts(){
   }
 }
 
+
+async function getMostRecentPosts(num_posts){
+	try{
+		let posts = await pool.query("SELECT * FROM posts ORDER BY time ASC");
+		return posts;
+	}
+	catch(err){
+		console.log(err);
+	}
+}
+
 module.exports = {
-	
+	getMostRecentPosts
 }
 
