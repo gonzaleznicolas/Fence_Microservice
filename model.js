@@ -3,10 +3,10 @@ const util = require('util');
 
 var pool = mysql.createPool({
   connectionLimit : 10,
-  host: "aa1jkdj3cz1d2sd.cq1jyeha7bzs.us-west-2.rds.amazonaws.com",
-  user: "nico",
-  password: ".Seng401",
-  database: "ebdb"
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DATABASE
 });
 
 pool.query = util.promisify(pool.query)
